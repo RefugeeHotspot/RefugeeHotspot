@@ -1,0 +1,116 @@
+Wifi Hotspot Device
+
+A mobile device to remove the obstacles that refugees face when it comes to access the internet is being developed by ALT & ISOC-NL in dialogue with refugee collectives in the Netherlands, Belgium and Germany, this devices will provide connectivity in each of the collectives physical locations and thanks to its batteries will keep providing connectivity in the situation on which a collective is being evicted from their location. The device can be taken into demonstrations, marches or specific actions acting as a media center in combination with the rest of the media platform. It will be possible to distribute files, images, statements and flyers wireless while using the device in the collectives locations but also in demonstrations, beyond connectivity  it also functions as a portable digital toolkit and library for the collectives.  The devices will play a role in the physical location of the Forum at Drielandenpunt and potentially could be implemented in a way that helps other refugees in transit through Europe and beyond. The device is planned to be as minimal, specific and easy to use as possible. It is identifiable and iconic,in its aesthetics will represent the struggle of the refugees and ideas of freedom, transparency and openness. Its use will be identified as an act of technological empowerment and contribute toppling the dominating image of mainstream media on the refugees. It will be carried on by the members of therefugee collectives after the Forum. An online campaign (in the context of the broader Forum campaign) will be launched to spread and expand the development and reach of the device, being easy to scale up and distribute to other places. The campaign includes basic user guides accessible for refugees in different languages and an awareness campaign about the refugee struggle and the access to internet as a right for everyone. The campaign could use elements of crowdfunding and it could be open for new partners that will help and support the further diffusion of the device and how-to to as many collectives as possible.
+
+The goal is to implement a critical and conscious use of technology, conceptually consequent with the values of the Forum and the specific situations of the collectives involved. The platform aims to use values of the free software and open source movements, as they resonate as necessary for the struggle towards a free and open society.
+
+
+Shopping list:
+    
+______________
+Purchased by NtO on 28/11
+    http://www.dlink.com/uk/en/home-solutions/connect/broadband-modems-and-routers/dwr-921-4g-lte-router <--- SIM card slot integrated
+    
+    Portable Router TP­LINK TL­MR3020 3G/4G Wireless N150 <--- No SIM card slot http://www.amazon.co.uk/gp/product/B00634PLTW?psc=1&redirect=true&ref_=ox_sc_act_title_7&smid=A3P5ROKL5A1OLE
+    
+    USB 4g dongle+SIM card http://www.amazon.co.uk/Huawei-E398u-1-Rotator-FASTEST-available/dp/B00BPYTX4E/ref=sr_1_1?ie=UTF8&qid=1448723439&sr=8-1&keywords=huawei+4g+dongle+e398u
+    
+    Battery Pack 20.000mah http://www.amazon.co.uk/Compact-20000mAh-Portable-Anker-PowerCore/dp/B00VJSGT2A/ref=sr_1_3?ie=UTF8&qid=1448723027&sr=8-3&keywords=battery+pack
+    
+    TTL cable http://www.amazon.co.uk/USB-TTL-Serial-Cable-Raspberry/dp/B00CNUH6QG/ref=sr_1_2?ie=UTF8&qid=1448723791&sr=8-2&keywords=ttl+cable+raspberry+pi
+    
+    Wifi Antenna USB http://www.amazon.co.uk/Network-AWUS036AC-Long-Range-Dual-Band-Connections/dp/B00MX57AO4/ref=sr_1_10?ie=UTF8&qid=1448723928&sr=8-10&keywords=wifi+antenna+usb
+    
+    32GB Micro SD card (OS+storage space) http://www.amazon.co.uk/gp/product/B00519BEQY?psc=1&redirect=true&ref_=ox_sc_act_title_4&smid=A1I0WA5OXHTGPB
+    
+    Case for the device
+    
+    Raspberry Pi 2 B+ http://www.amazon.co.uk/gp/product/B00T2U7R7I?psc=1&redirect=true&ref_=ox_sc_act_title_3&smid=A3P5ROKL5A1OLE
+
+________________
+
+Hackathon info:
+
+Four setup possibilities to be tested:
+    
+    1.
+    4g USB modem/dongle + RPi + antenna
+    (in which RPi functions as router)
+    (cheapest but depends on most config of RPi)
+
+    2.
+    4g dongle + router TPLink + RPi 
+    (in which RPi functions for extra services)    
+    (a bit more expensive but with less config and dedicated hardware (RPi doesn't do networking)
+    
+    3.
+    4g router&modem DLink + RPi
+    (in which RPi functions for extra services)
+    (most expensive but with integrated dongle, modem and router (RPi doesn't do networking)
+    # assumption is that this is pretty much a ready-made solution
+    
+    4. 
+ 4g dongle + netaidkit + RPi
+
+Hackathon challenges
+- How to make a case
+- How to make it working on power as well as battery
+- How to make the interface on the landingpage
+- Do we need to make an image for OpenWRT or can we do it with existing firmware
+- Can we provide a choice for native Tor support 
+- Running RPi
+- Running on router
+- Can we provide a choice for native VPN support
+
+Hackathon questions
+- Which device setup (mentioned above) is most efficient
+- Which device setup (mentioned above) is most resilient
+- Which device setup (mentioned above) is easiest reproducable
+- Which device setup (mentioned above) is most functional
+- Tor
+- Landing page
+- Alternative services
+- What are relevant services that could run on the RPi
+- Message board
+- Digital library, DIY guide, Refugee resources such as maps, institutions for help...
+- Chat functionality
+- Local upload of images and videos of the protest
+- Interface connecting with the broader online media platform (the "editorial protocol")
+
+Hackathon proposed structure
+1. Hardware / Materiality
+- Case
+- Battery
+- Power
+
+2. Router software 
+- OpenWRT
+- Standard firmware
+- VPN / Tor support
+
+3. RPi services
+- RPi as router
+- Tor / VPN support
+- Landing page
+- Chat
+
+IF YOU DON'T DOCUMENT YOUR WORK - IT'S USELESS ;)
+
+
+How to mediate the replication of the device?
+- Online campaign of making your own?
+- DIY user guide
+
+
+How to ensure awareness on the device and how to enable most inclusive use of services
+- outreach and engagement
+- user guide
+- intermediaries / ToT...
+
+
+Rpi Zero version:
+    Adding Ethernet support in the GPIO:
+        http://raspi.tv/2015/ethernet-on-pi-zero-how-to-put-an-ethernet-port-on-your-pi
+        
+    Adding Wifi module soldered (no USB):
+        https://hackaday.com/2015/11/28/first-raspberry-pi-zero-hack-piggy-back-wifi/
