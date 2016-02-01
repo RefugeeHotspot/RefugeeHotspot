@@ -1,6 +1,6 @@
 # Refugee Hotspot
 
-A mobile device to remove the obstacles that refugees face when it comes to access the internet is being developed by Alternative Learning Tank (ALT) & ISOC-NL in dialogue with refugee collectives in the Netherlands, Belgium and Germany, this devices will provide connectivity in each of the collectives physical locations and thanks to its batteries will keep providing connectivity in the situation on which a collective is being evicted from their location. 
+A mobile device to remove the obstacles that refugees face when it comes to access the internet is being developed by Alternative Learning Tank (ALT) & The Internet Society Netherlands (ISOC-NL) in dialogue with refugee collectives in the Netherlands, Belgium and Germany, this devices will provide connectivity in each of the collectives physical locations and thanks to its batteries will keep providing connectivity in the situation on which a collective is being evicted from their location. 
 
 The device can be taken into demonstrations, marches or specific actions acting as a media center in combination with the rest of the media platform. It will be possible to distribute files, images, statements and flyers wireless while using the device in the collectives locations but also in demonstrations, beyond connectivity  it also functions as a portable digital toolkit and library for the collectives.  
 
