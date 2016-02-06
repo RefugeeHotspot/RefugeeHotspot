@@ -1,0 +1,52 @@
+
+* change keyboard map
+* set up wpa_supplicant
+* update OS
+* install hostapd
+* install links
+
+Try to get 801.11ac USB dongle to work:
+* Download .deb for kernel-headers from https://www.niksula.hut.fi/~mhiienka/Rpi/linux-headers-rpi/
+* apt install gcc-4.7
+* apt install git
+* git clone http://github.com/diederikdehaas/rtl8812AU
+* cd rtl8812AU/
+* vi Makefile 
+ARCH := arm
+* make
+* sudo make
+* sudo make install
+Give up in disgust.
+
+Try to get RTL 8188CUS to work as hostapd:
+$ wget https://dl.dropboxusercontent.com/u/1663660/scripts/install-rtl8188cus.sh
+Update /etc/hostapd/hostapd.conf
+Remove br0 from /etc/network/interfaces
+Reboot
+
+
+* sudo apt install tcpdump
+
+Set up DHCP:
+$ sudo apt install isc-dhcp-server
+$ vi /etc/dhcp3/dhcpd.conf
+
+Set up DNS:
+$ sudo apt install unbound
+$ sudo apt install dnsutils
+
+* sudo apt install vim
+
+Set up 4G with vodafone dongle (type?):
+* sudo apt install ppp
+* sudo apt install network-manager
+* disable agetty on our device:
+  sudo systemctl disable serial-getty@ttyAMA0
+  sudo systemctl mask serial-getty@ttyAMA0
+
+* sudo apt install xorg
+* sudo apt install fvwm
+* sudo apt install network-manager-gnome
+
+12d1:1446 usb_modeswitch.d fix (search for it)
+
