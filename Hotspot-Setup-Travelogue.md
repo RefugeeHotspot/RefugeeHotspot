@@ -33,7 +33,7 @@ to SD adaptor (many microSD include one when you buy them).
 If you want to use the command line to write the image, you need to
 know what device to write to. The `dmesg` command will usually display
 information about what the device name is. This is usually
-/dev/mmcblk0 or /dev/sdc or something like that.
+`/dev/mmcblk0` or `/dev/sdc` or something like that.
 
 This is what I used:
 
@@ -101,12 +101,22 @@ Make the last line:
 
     nomad ALL=(ALL) NOPASSWD: ALL
 
-You can put an SSH public key in ~nomad/.ssh/authorized_keys, and then
-the password is no longer necessary.
+You can put an SSH public key in `~nomad/.ssh/authorized_keys`, and
+then the password is no longer necessary.
 
 Finally, log in as the `nomad` user and remove the default `pi` user:
 
     $ sudo deluser --remove-all-files pi
+
+# Picking Private IP Addresses
+
+We need to decide which IP addresses to use when people connect. This
+is almost always done using RFC 1918 addresses. Most commonly this
+looks like `192.168.1.15` or `10.1.1.177`. Because these addresses are
+not registered anywhere, it is possible that they will collide. In
+order to avoid this, we will use somewhat unusual ones,
+`172.27.1.0/24`. This does not guarantee that there will be no
+collisions, but the chances are small.
 
 # WiFi Driver Installation
 
@@ -153,13 +163,15 @@ Finally we can build our wireless drivers:
 
 # WiFi Setup as Host Access Point (hostapd)
 
-Once we have our wireless drivers, we can 
-The hostapd is a package:
+Once we have our wireless drivers, we can set up the host as an
+access point. The usual way is with the hostapd program.
+
+hostapd is a package:
 
     $ sudo apt install hostapd
 
-Remove wlan0 and wlan1 from `/etc/network/interfaces`, but then add
-the following:
+Remove `wlan0` and `wlan1` from `/etc/network/interfaces`, but then
+add the following:
 
 ```
 allow-hotplug wlan0
@@ -259,8 +271,10 @@ Restart SSH for this to take effect:
 
 ## Tor Hidden Service for SSH
 
-We will do this via a Tor hidden service. This is beneficial mostly
-because it provides a stable end-point for us to connect to.
+We will add a Tor hidden service. This is beneficial mostly because it
+provides a stable end-point for us to connect to no matter what IP
+address our ISP gives us. It is slow, but perfectly usable for simple
+administration.
 
 A good HOWTO is here:
 
@@ -311,6 +325,7 @@ TODO: cron-apt
 TODO: mdns  
 TODO: upnp  
 TODO: sshguard?  
+TODO: IPv6  
 
 Current development unit is at: 
 
