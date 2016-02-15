@@ -28,7 +28,7 @@ https://www.raspberrypi.org/downloads/raspbian/
 
 You'll get a ZIP file that you need to unzip and copy to a microSD
 card. Many laptops have a SD reader, and you can easily get a microSD
-to SD adaptor (many microSD include one when you buy them).
+to SD adapter (many microSD include one when you buy them).
 
 If you want to use the command line to write the image, you need to
 know what device to write to. The `dmesg` command will usually display
@@ -93,7 +93,7 @@ You also need to add this user to some administration groups:
     $ sudo usermod -a -G adm,sudo nomad
 
 You should also set this user up to not need a password for the `sudo`
-commmand:
+command:
 
     $ sudo sudoedit /etc/sudoers
 
