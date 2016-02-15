@@ -76,8 +76,8 @@ If you want, it might be helpful to install a few utilities.
 By default the device calls itself "raspberrypi". We should rename
 this to something that we like. Change "raspberrypi" to "nomad" in:
 
-    * `/etc/hosts`
-    * `/etc/hostname`
+* `/etc/hosts`
+* `/etc/hostname`
 
 ## Adding a User and Removing Default User
 
@@ -304,13 +304,15 @@ Then you can log in via ssh using the `.onion` name.
 
 --------
 
-_Everything after here is future work_
+_Everything after here is future work or random notes_
 
-TODO: e-mail for sending
-TODO: cron-apt
-TODO: mdns
-TODO: upnp
+TODO: e-mail for sending  
+TODO: cron-apt  
+TODO: mdns  
+TODO: upnp  
+TODO: sshguard?  
 
-ssh nomad@woiwd7td322ef4cv.onion
+Current development unit is at: 
 
-TODO: sshguard?
+    ssh nomad@woiwd7td322ef4cv.onion
+
