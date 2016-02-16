@@ -10,7 +10,7 @@ Before starting, a few pieces of hardware will be necessary:
   1. Raspberry Pi 2
   2. Powered USB hub
   3. ALFA AWUS036AC USB 802.11 WiFi dongle
-  4. _4G USB dongle_
+  4. Huawei E303 USB 4G dongle
   5. microSD card (and a way to write to it)
   6. USB cables to connect everything
 
@@ -69,6 +69,8 @@ If you want, it might be helpful to install a few utilities.
     $ sudo apt install screen
     $ sudo apt install mtr-tiny
     $ sudo apt install tcpdump
+    $ sudo apt install telnet
+    $ sudo apt install dnsutils
     $ sudo apt install lsof
 
 ## Renaming the Device
@@ -315,6 +317,32 @@ ProxyCommand connect -a none -R remote -5 -S 127.0.0.1:9050 %h %p
 
 Then you can log in via ssh using the `.onion` name.
 
+## Enable 4G network
+
+We turn our Huawei E303 into a modem though magic commands. This is
+all documented:
+
+http://www.linux-hardware-guide.com/2014-05-11-huawei-e303-wireless-mobile-broadband-modem-umts-gsm-microsd-usb-2-0
+
+We need to install "USB modeswitch" utilities:
+
+    $ sudo apt install usb-modeswitch
+
+Then we can update the udev rules to turn the USB dongle into a modem
+by creating `/etc/udev/rules.d/70-usb-modeswitch.rules` so that it
+looks like this:
+
+```
+ACTION=="add", SUBSYSTEM=="usb", ATTRS{idVendor}=="12d1", ATTRS{idProduct}=="1f01", RUN+="/usr/sbin/usb_modeswitch -v 12d1 -p 1f01 -M '55534243123456780000000000000a11062000000000000100000000000000'"
+```
+
+Add the following to `/etc/network/interfaces`:
+
+```
+iface eth1 inet manual
+```
+
+A reboot should bring the dongle up as the `eth1` interface.
 
 --------
 
@@ -324,10 +352,10 @@ TODO: e-mail for sending
 TODO: cron-apt  
 TODO: mdns  
 TODO: upnp  
-TODO: sshguard?  
 TODO: IPv6  
+TODO: strip out unused stuff to speed boot (for example)
 
 Current development unit is at: 
 
-    ssh nomad@woiwd7td322ef4cv.onion
+    ssh nomad@2kxtpnxegsfy53jz.onion
 
