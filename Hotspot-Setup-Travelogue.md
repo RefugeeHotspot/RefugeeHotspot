@@ -317,7 +317,7 @@ ProxyCommand connect -a none -R remote -5 -S 127.0.0.1:9050 %h %p
 
 Then you can log in via ssh using the `.onion` name.
 
-## Enable 4G network
+## Enable 4G Network
 
 We turn our Huawei E303 into a modem though magic commands. This is
 all documented:
@@ -340,22 +340,95 @@ Add the following to `/etc/network/interfaces`:
 
 ```
 iface eth1 inet manual
+        pre-up tc qdisc add dev eth1 root fq_codel
+        post-down tc qdisc del dev eth1 root fq_codel
 ```
 
+Go ahead and set up `eth0` to also use the `fq_codel` scheme:
+
+```
+iface eth0 inet manual
+        pre-up tc qdisc add dev eth0 root fq_codel
+        post-down tc qdisc del dev eth0 root fq_codel
+```
+
+
 A reboot should bring the dongle up as the `eth1` interface.
+
+# Setting up IP Forwarding
+
+We need to enable forwarding from the WiFi network to the Internet.
+
+Modify `/etc/sysctl.conf` to support IPv4 packet forwarding:
+
+```
+net.ipv4.ip_forward=1
+```
+
+Now set up the low-level NAT functionality:
+
+    $ sudo iptables -t nat -A POSTROUTING -o eth1 -j MASQUERADE
+    $ sudo iptables -A FORWARD -i eth1 -o wlan0 -m state --state RELATED,ESTABLISHED -j ACCEPT
+    $ sudo iptables -A FORWARD -i wlan0 -o eth1 -j ACCEPT
+
+Now make it persistent:
+
+    $ sudo apt install iptables-persistent
+
+Save the current IPv4 table rules. The IPv6 can be saved, but we are
+not (yet) setting up IPv6.
+
+# Add a DNS Resolver
+
+We could forward DNS queries to the 4G ISP's network, but it makes
+sense to keep a local caching resolver on the access point. Soon the
+Knot Resolver will probably be the best choice, since it provides a
+static cache that can be recovered on restart. But for now the Unbound
+resolver is probably the best option, as it is fast and stable.
+
+    $ sudo apt install unbound
+
+Set up `/etc/unbound/unbound.conf`:
+
+```
+include: "/etc/unbound/unbound.conf.d/*.conf"
+
+server:
+  prefetch: yes
+  prefetch-key: yes
+  minimal-responses: yes
+  harden-referral-path: yes
+
+  interface: 0.0.0.0
+  access-control: 172.27.1.0/24 allow
+```
+
+# Disable Unneeded Services
+
+By default Raspbian starts a few services that we don't care about.
+Lets disable those:
+
+    $ sudo systemctl stop avahi-daemon
+    $ sudo systemctl disable avahi-daemon
+    $ sudo systemctl stop triggerhappy
+    $ sudo systemctl disable triggerhappy
 
 --------
 
 _Everything after here is future work or random notes_
 
-TODO: e-mail for sending  
-TODO: cron-apt  
+TODO: restrict access to 192.168.8.1 (admin page)  
+TODO: rate limiting  
+TODO: e-mail for sending    
+TODO: cron-apt    
+TODO: overclock http://haydenjames.io/raspberry-pi-2-overclock/    
 TODO: mdns  
 TODO: upnp  
 TODO: IPv6  
-TODO: strip out unused stuff to speed boot (for example)
+TODO: strip out unused stuff to speed boot (for example)  
+TODO: automatically switch to Ethernet when possible  
 
 Current development unit is at: 
 
-    ssh nomad@2kxtpnxegsfy53jz.onion
+    ssh -v nomad@2kxtpnxegsfy53jz.onion
 
