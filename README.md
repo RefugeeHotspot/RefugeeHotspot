@@ -22,7 +22,7 @@ The goal is to implement a critical and conscious use of technology, conceptuall
 Have a look at the device setup here: 
 https://github.com/RefugeeHotspot/RefugeeHotspot/blob/master/Hotspot-Setup-Travelogue.md 
 
-We'l' have a bootable beta image up soon!
+We'll have a bootable beta image up soon!
 
 # Questions? Comments? More information?:
 
