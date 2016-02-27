@@ -22,11 +22,12 @@ The goal is to implement a critical and conscious use of technology, conceptuall
 Have a look at the device setup here: 
 https://github.com/RefugeeHotspot/RefugeeHotspot/blob/master/Hotspot-Setup-Travelogue.md 
 
-Soon we should have a bootable beta image up!
+We'l' have a bootable beta image up soon!
 
 # Questions? Comments? More information?:
 
 Feel free to email refugeehotspot [at] alternativelearningtank [dot] net or leave an issue in the tracker.
-More information: http://www.alternativelearningtank.net/otb.html
+
+And example of how we think the Refugee Hotspot can be used: http://www.alternativelearningtank.net/otb.html
 
 
