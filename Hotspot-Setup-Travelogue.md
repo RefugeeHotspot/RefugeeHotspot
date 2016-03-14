@@ -120,49 +120,6 @@ order to avoid this, we will use somewhat unusual ones,
 `172.27.1.0/24`. This does not guarantee that there will be no
 collisions, but the chances are small.
 
-# WiFi Driver Installation
-
-We need non-mainstream drivers for the USB wireless dongle. There is a
-version maintained here:
-
-    https://github.com/diederikdehaas/rtl8812AU
-
-We need to install git so that we can clone this:
-
-    $ sudo apt install git
-    $ git clone https://github.com/diederikdehaas/rtl8812AU.git
-
-We need to get a copy of our kernel headers. There is a repository
-here:
-
-    https://www.niksula.hut.fi/~mhiienka/Rpi/linux-headers-rpi/
-
-Download the one that matches the version reported using `uname -r`.
-
-    $ sudo wget https://www.niksula.hut.fi/~mhiienka/Rpi/linux-headers-rpi/linux-headers-4.1.17-v7%2B_4.1.17-v7%2B-2_armhf.deb
-
-We'll need some stuff to install this:
-
-    $ sudo apt install gcc-4.7 cpp-4.7 libgcc-4.7-dev
-
-Finally we can install the headers:
-
-    $ sudo dpkg -i linux-headers-4.1.17-v7+_4.1.17-v7+-2_armhf.deb
-
-For some reason this is installed with read permissions only for root.
-Fix that!
-
-    $ find /usr/src/linux-headers* -print0 | sudo xargs -0 chmod og+r 
-    $ find /usr/src/linux-headers* -type d -print0 | sudo xargs -0 chmod og+x
-    $ find /usr/share/doc/linux-headers* -print0 | sudo xargs -0 chmod og+r 
-    $ find /usr/share/doc/linux-headers* -type d -print0 | sudo xargs -0 chmod og+x 
-
-Finally we can build our wireless drivers:
-
-    $ cd rtl8812AU
-    $ make ARCH=arm -j4
-    $ sudo make install
-
 # WiFi Setup as Host Access Point (hostapd)
 
 Once we have our wireless drivers, we can set up the host as an
@@ -370,7 +327,11 @@ GreenHost:
     $ sudo cp ca.crt niels.* /etc/openvpn/greenhost
     $ sudo cp greenhost.ovpn /etc/openvpn/greenhost.conf
     $ sudo vim /etc/openvpn/greenhost.conf # set paths to /etc/openvpn/greenhost
-
+    ...
+    ca /etc/openvpn/greenhost/ca.crt
+    cert /etc/openvpn/greenhost/niels.crt
+    key /etc/openvpn/greenhost/niels.key
+    ...
 
 # Setting up IP Forwarding
 
@@ -510,6 +471,37 @@ iptables -t nat -I PREROUTING -p tcp --dport 443 -m mac --mac-source $MAC -j ACC
 exit 0
 ```
 
+We will need to run this script as root.
+
+    $ sudo chmod 755 /usr/local/bin/iptables-open
+    $ sudo sudoedit /etc/sudoers
+    ...
+    www-data ALL = NOPASSWD: /usr/local/bin/iptables-open *
+    ...
+
+# Setup Apache
+
+Install the Apache web server:
+
+    $ sudo apt install apache2
+
+Put our awesome landing page in place:
+
+    $ sudo cp index.html /var/www/html/index.html
+
+Set up CGI so that it will run:
+
+    $ cd /etc/apache2/mods-enabled
+    $ sudo ln -s ../mods-available/cgi.load .
+    $ sudo vim /etc/apache2/mods-available/mime.conf
+    ...
+        AddHandler cgi-script .cgi
+    ...
+    $ sudo apachectl restart
+
+
+nomad@nomad:/var/www/html $ sudo mv button.cgi /usr/lib/cgi-bin/.
+
 --------
 
 _Everything after here is future work or random notes_
@@ -517,14 +509,11 @@ _Everything after here is future work or random notes_
 TODO: rate limiting  
 TODO: e-mail for sending    
 TODO: cron-apt    
-TODO: overclock http://haydenjames.io/raspberry-pi-2-overclock/    
 TODO: upnp  
 TODO: IPv6  
-TODO: mdns  
 TODO: strip out unused stuff to speed boot (for example)  
 TODO: restore access to 192.168.8.1 (admin page)  
 
 Current development unit is at: 
 
-    ssh -v nomad@2kxtpnxegsfy53jz.onion
-
+    ssh -v nomad@w4mtwfeuz3ul4zdz.onion
