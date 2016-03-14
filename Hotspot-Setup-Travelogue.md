@@ -120,49 +120,6 @@ order to avoid this, we will use somewhat unusual ones,
 `172.27.1.0/24`. This does not guarantee that there will be no
 collisions, but the chances are small.
 
-# WiFi Driver Installation
-
-We need non-mainstream drivers for the USB wireless dongle. There is a
-version maintained here:
-
-    https://github.com/diederikdehaas/rtl8812AU
-
-We need to install git so that we can clone this:
-
-    $ sudo apt install git
-    $ git clone https://github.com/diederikdehaas/rtl8812AU.git
-
-We need to get a copy of our kernel headers. There is a repository
-here:
-
-    https://www.niksula.hut.fi/~mhiienka/Rpi/linux-headers-rpi/
-
-Download the one that matches the version reported using `uname -r`.
-
-    $ sudo wget https://www.niksula.hut.fi/~mhiienka/Rpi/linux-headers-rpi/linux-headers-4.1.17-v7%2B_4.1.17-v7%2B-2_armhf.deb
-
-We'll need some stuff to install this:
-
-    $ sudo apt install gcc-4.7 cpp-4.7 libgcc-4.7-dev
-
-Finally we can install the headers:
-
-    $ sudo dpkg -i linux-headers-4.1.17-v7+_4.1.17-v7+-2_armhf.deb
-
-For some reason this is installed with read permissions only for root.
-Fix that!
-
-    $ find /usr/src/linux-headers* -print0 | sudo xargs -0 chmod og+r 
-    $ find /usr/src/linux-headers* -type d -print0 | sudo xargs -0 chmod og+x
-    $ find /usr/share/doc/linux-headers* -print0 | sudo xargs -0 chmod og+r 
-    $ find /usr/share/doc/linux-headers* -type d -print0 | sudo xargs -0 chmod og+x 
-
-Finally we can build our wireless drivers:
-
-    $ cd rtl8812AU
-    $ make ARCH=arm -j4
-    $ sudo make install
-
 # WiFi Setup as Host Access Point (hostapd)
 
 Once we have our wireless drivers, we can set up the host as an
@@ -315,6 +272,10 @@ Host *.onion
 ProxyCommand connect -a none -R remote -5 -S 127.0.0.1:9050 %h %p
 ```
 
+You need to have the `connect` program installed. In Debian or
+Debian-derived distributions (like Ubuntu or Linux Mint) then this
+is in the `connect-proxy` package.
+
 Then you can log in via ssh using the `.onion` name.
 
 ## Enable 4G Network
@@ -355,6 +316,23 @@ iface eth0 inet manual
 
 A reboot should bring the dongle up as the `eth1` interface.
 
+
+# VPN Setup
+
+We prefer to tunnel traffic via a VPN. We have a VPN set up at
+GreenHost:
+
+    $ sudo apt install openvpn
+    $ sudo mkdir /etc/openvpn/greenhost
+    $ sudo cp ca.crt niels.* /etc/openvpn/greenhost
+    $ sudo cp greenhost.ovpn /etc/openvpn/greenhost.conf
+    $ sudo vim /etc/openvpn/greenhost.conf # set paths to /etc/openvpn/greenhost
+    ...
+    ca /etc/openvpn/greenhost/ca.crt
+    cert /etc/openvpn/greenhost/niels.crt
+    key /etc/openvpn/greenhost/niels.key
+    ...
+
 # Setting up IP Forwarding
 
 We need to enable forwarding from the WiFi network to the Internet.
@@ -367,9 +345,11 @@ net.ipv4.ip_forward=1
 
 Now set up the low-level NAT functionality:
 
-    $ sudo iptables -t nat -A POSTROUTING -o eth1 -j MASQUERADE
-    $ sudo iptables -A FORWARD -i eth1 -o wlan0 -m state --state RELATED,ESTABLISHED -j ACCEPT
-    $ sudo iptables -A FORWARD -i wlan0 -o eth1 -j ACCEPT
+    $ sudo iptables -t nat -A PREROUTING -p tcp --dport 80 -j DNAT --to-destination 172.27.1.1
+    $ sudo iptables -t nat -A PREROUTING -p tcp --dport 443 -j DNAT --to-destination 172.27.1.1
+    $ sudo iptables -t nat -A POSTROUTING -o tun0 -j MASQUERADE
+    $ sudo iptables -A FORWARD -i tun0 -o wlan0 -m state --state RELATED,ESTABLISHED -j ACCEPT
+    $ sudo iptables -A FORWARD -i wlan0 -o tun0 -j ACCEPT
 
 Now make it persistent:
 
@@ -377,6 +357,14 @@ Now make it persistent:
 
 Save the current IPv4 table rules. The IPv6 can be saved, but we are
 not (yet) setting up IPv6.
+
+If you change the rules later you can save them via:
+
+    $ sudo dpkg-reconfigure iptables-persistent
+
+But be careful not to make any MAC addresses that have been authorized
+to connect to the Internet persistent. If in doubt, don't save the
+iptables rules!
 
 # Add a DNS Resolver
 
@@ -413,22 +401,119 @@ Lets disable those:
     $ sudo systemctl stop triggerhappy
     $ sudo systemctl disable triggerhappy
 
+
+# Script to Unblock IP from Landing Page
+
+We need a way that when a user acknowledges the landing page that we
+remove them from the `iptables` rules. The following script,
+`/usr/local/bin/iptables-open`, should work:
+
+```bash
+#! /bin/bash
+
+# This script opens the iptables rules for a given IP address so that
+# it can connect to the Internet without getting traffic redirected to
+# the landing page.
+#
+# It works by looking for the IP address in the ARP table and then
+# inserting a rule for the MAC address found into the iptables to
+# allow traffic.
+# 
+# For debugging, you can use "-v" and it will log what it is doing
+# using syslog. DO NOT USE "-v" IN NORMAL OPERATION. It will then log
+# all MAC addresses to syslog which may be recovered later, and we
+# prefer not to log anything that can be used to identify users.
+#
+# It could be improved by:
+# * adding help (for example if run without arguemnts)
+# * deleting any old rules for the MAC address found (in case run
+#   multiple times)
+# * checking the result of the iptables run
+# * providing output (so if something goes wrong we can return a code
+#   to the user)
+
+# This script looks in the ARP table and finds the MAC 
+
+# if we've run with verbose, then log everything
+if [ "$1" == "-v" ]; then
+  LOG="logger --"
+  PROC_NAME=`readlink --canonicalize $0`
+  $LOG $PROC_NAME running with arguments '"'$*'"'
+  shift
+else
+  LOG=true
+fi
+
+# the IP address should be passed as the first argument
+IP=$1
+$LOG looking for IP address $IP in ARP table
+
+# look for this IP address in our ARP table
+MAC=`awk '/^'$1'/{ print $4 }' /proc/net/arp`
+
+# confirm that we got something that looks like a MAC address
+echo $MAC | egrep -q '^([a-f0-9]{2}:){5}[a-f0-9]{2}$'
+if [ $? -ne 0 ]; then
+  $LOG got '"'"$MAC"'"', which does not look like a mac address
+  exit 1
+fi
+
+# we found this MAC address
+$LOG $IP using MAC address $MAC
+
+# open up our iptables for this MAC address
+$LOG iptables -t nat -I PREROUTING -p tcp --dport 80 -m mac --mac-source $MAC -j ACCEPT
+iptables -t nat -I PREROUTING -p tcp --dport 80 -m mac --mac-source $MAC -j ACCEPT
+$LOG iptables -t nat -I PREROUTING -p tcp --dport 443 -m mac --mac-source $MAC -j ACCEPT
+iptables -t nat -I PREROUTING -p tcp --dport 443 -m mac --mac-source $MAC -j ACCEPT
+
+# yay, it worked
+exit 0
+```
+
+We will need to run this script as root.
+
+    $ sudo chmod 755 /usr/local/bin/iptables-open
+    $ sudo sudoedit /etc/sudoers
+    ...
+    www-data ALL = NOPASSWD: /usr/local/bin/iptables-open *
+    ...
+
+# Setup Apache
+
+Install the Apache web server:
+
+    $ sudo apt install apache2
+
+Put our awesome landing page in place:
+
+    $ sudo cp index.html /var/www/html/index.html
+
+Set up CGI so that it will run:
+
+    $ cd /etc/apache2/mods-enabled
+    $ sudo ln -s ../mods-available/cgi.load .
+    $ sudo vim /etc/apache2/mods-available/mime.conf
+    ...
+        AddHandler cgi-script .cgi
+    ...
+    $ sudo apachectl restart
+
+
+nomad@nomad:/var/www/html $ sudo mv button.cgi /usr/lib/cgi-bin/.
+
 --------
 
 _Everything after here is future work or random notes_
 
-TODO: restrict access to 192.168.8.1 (admin page)  
 TODO: rate limiting  
 TODO: e-mail for sending    
 TODO: cron-apt    
-TODO: overclock http://haydenjames.io/raspberry-pi-2-overclock/    
-TODO: mdns  
 TODO: upnp  
 TODO: IPv6  
 TODO: strip out unused stuff to speed boot (for example)  
-TODO: automatically switch to Ethernet when possible  
+TODO: restore access to 192.168.8.1 (admin page)  
 
 Current development unit is at: 
 
-    ssh -v nomad@2kxtpnxegsfy53jz.onion
-
+    ssh -v nomad@w4mtwfeuz3ul4zdz.onion
