@@ -10,9 +10,8 @@ The goal is to implement a critical and conscious use of technology, conceptuall
 
 # Device Specs
 
-    Raspberry Pi 2 B+
+    Raspberry Pi 3
     4g USB modem/dongle (Huawei E303)
-    WiFi antenna (AWUS036AC USB 802.11 WiFi dongle)
     32GB Micro SD card
     Powered USB hub
     Battery pack
