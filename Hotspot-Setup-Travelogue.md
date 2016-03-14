@@ -137,9 +137,14 @@ allow-hotplug wlan0
 iface wlan0 inet static
         address 172.27.1.1
         netmask 255.255.255.0
-        pre-up tc qdisc add dev wlan0 root fq_codel
-        post-down tc qdisc del dev wlan0 root fq_codel
+        post-up tc qdisc add dev wlan0 root handle 1:0 htb default 10
+        post-up tc class add dev wlan0 parent 1:0 classid 1:10 htb rate 50kbps ceil 50kbps prio 0
+        post-down tc qdisc del dev wlan0 root
 ```
+
+The `post-up` rules will set up the traffic shaping so that we don't
+download too much stuff. This allows VoIP but is not enough for video
+(tested with YouTube).
 
 Create `/etc/hostap/hostapd.conf`:
 
@@ -502,17 +507,54 @@ Set up CGI so that it will run:
 
 nomad@nomad:/var/www/html $ sudo mv button.cgi /usr/lib/cgi-bin/.
 
+# Set up E-mail 
+
+We'll use the Simple SMTP program, which just delivers mail.
+
+    $ sudo apt install ssmtp 
+    $ sudo apt install bsd-mailx
+
+    $ sudo vi /etc/ssmtp/ssmtp.conf
+    ...
+    mailhub=smtp.greenhost.nl:587
+    rewritedomain=refugeehotspot.net
+    hostname=nomad.refugeehotspot.net
+    FromLineOverride=YES
+    UseTLS=YES
+    UseSTARTTLS=YES
+    AuthUser=hotspots@refugeehotspot.net
+    AuthPass=...
+    ...
+
+# Set up automatic updates
+
+As documented here: https://wiki.debian.org/UnattendedUpgrades
+
+    $ sudo apt install unattended-upgrades
+    $ sudo vi /etc/apt/apt.conf.d/50unattended-upgrades
+    ...
+    Unattended-Upgrade::Mail "hotspots@refugeehotspot.net";
+    Unattended-Upgrade::Automatic-Reboot "true";
+    Unattended-Upgrade::Automatic-Reboot-Time "03:00";
+    Acquire::http::Dl-Limit "50";
+    ...
+
+    $ sudo dpkg-reconfigure -plow unattended-upgrades
+    APT::Periodic::Update-Package-Lists "1";
+    APT::Periodic::Unattended-Upgrade "1";
+
+
 --------
 
 _Everything after here is future work or random notes_
 
-TODO: rate limiting  
-TODO: e-mail for sending    
-TODO: cron-apt    
+TODO: e-mail on boot with Tor hidden service
+TODO: check TLS certificate when sending mail
 TODO: upnp  
 TODO: IPv6  
 TODO: strip out unused stuff to speed boot (for example)  
 TODO: restore access to 192.168.8.1 (admin page)  
+TODO: PGP encrypt sending mail :)
 
 Current development unit is at: 
 
