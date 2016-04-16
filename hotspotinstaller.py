@@ -1,8 +1,11 @@
 #! /usr/bin/env python3
 
+import getpass
+import http.client
 import os
 import readline
 import shutil
+import smtplib
 import sys
 import time
 
@@ -57,6 +60,16 @@ def main():
     want_run = yes_no("Do you want to run the Hotspot Installer?")
     if want_run != "y":
         sys.exit(0)
+
+    # verify that our Internet connection works
+    try:
+        conn = http.client.HTTPSConnection("www.isoc.nl", timeout=5)
+        conn.request("HEAD", "/")
+        conn.getresponse()
+    except OSError as err:
+        print("Error connecting to https://www.isoc.nl: " + str(err))
+        print("Internet connection does not seem to be working")
+        sys.exit(1)
 
     # display introduction
     os.system("clear")
@@ -188,6 +201,8 @@ There are two approaches to this:
             spin.update()
             time.sleep(0.5)
         print("ready.")
+        # turn on the VPN for every boot
+        os.system("systemctl enable openvpn")
     else:
         print("File /etc/openvpn/hotspot.conf not found, no VPN set up.")
     wait_for_user()
@@ -196,11 +211,66 @@ There are two approaches to this:
     os.system("clear")
     print("""3. Administration notifications by e-mail
 
-As an administrator of this device you might want to receive an email
-every time the device does an update and when it reboots. If so,
-please enter an email address for these updates.
+As an administrator of this device you might want to receive an e-mail
+every time the device does an update and when it reboots. For this to
+work, you need to configure both the SENDING and RECEIVING e-mail
+accounts. These may be the same.
+
+Note this is optional.
 """)
-    admin_email = input("Administrator e-mail: ")
+    send_server = ''
+    send_port = 587
+    send_user = ''
+    send_password = ''
+    while True:
+        if send_server:
+            prompt = "Sending e-mail server [%s]: " % send_server
+        else:
+            prompt = "Sending e-mail server: "
+        send_server = input_with_default(prompt, send_server)
+        # if no server is specified, skip the rest
+        if send_server == '':
+            break
+        while True:
+            prompt = "Sending e-mail port [%d]: " % send_port
+            send_port = input_with_default(prompt, str(send_port))
+            if send_port == '':
+                send_port = None
+                break
+            try:
+                send_port = int(send_port)
+                if 1 <= send_port <= 65535:
+                    break
+                print("Port must be between 1 and 65535")
+            except ValueError:
+                print("Port must be a number")
+        if send_server:
+            prompt = "Sending e-mail user [%s]: " % send_user
+        else:
+            prompt = "Sending e-mail user: "
+        send_user = input_with_default(prompt, send_user)
+        if send_password:
+            prompt = "Sending e-mail password [******]: "
+        else:
+            prompt = "Sending e-mail password: "
+        send_password = getpass.getpass(prompt)
+
+        try:
+            with smtplib.SMTP(host=send_server, port=send_port) as smtp:
+                smtp.starttls()
+                smtp.login(user=send_user, password=send_password)
+        except OSError as err:
+            print("Error connecting to SMTP server: " + str(err))
+        else:
+            # SMTP login worked!
+            break
+
+    if send_server:
+        recv_email = input("Receiving e-mail address:")
+    else:
+        print("Skipping setting receiving e-mail since no SMTP configured")
+        wait_for_user()
+
 
     # Administrator e-mail setup
     os.system("clear")
@@ -209,7 +279,13 @@ please enter an email address for these updates.
 Do you also want status updates of your device to be sent to ISOC-NL?
 This will be used for statistics and might help us troubleshooting.
 """)
-    want_status_to_isoc = yes_no("Send status updates to ISOC-NL?")
+
+    if send_server:
+        want_status_to_isoc = yes_no("Send status updates to ISOC-NL?")
+    else:
+        print("Skipping setting status updates to ISOC-NL "
+              "since no SMTP configured")
+        wait_for_user()
 
     # Traffic shaping
     os.system("clear")
