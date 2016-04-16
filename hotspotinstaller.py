@@ -1,6 +1,7 @@
 #! /usr/bin/env python3
 
 import getpass
+import http.client
 import os
 import readline
 import shutil
@@ -59,6 +60,16 @@ def main():
     want_run = yes_no("Do you want to run the Hotspot Installer?")
     if want_run != "y":
         sys.exit(0)
+
+    # verify that our Internet connection works
+    try:
+        conn = http.client.HTTPSConnection("www.isoc.nl", timeout=5)
+        conn.request("HEAD", "/")
+        conn.getresponse()
+    except OSError as err:
+        print("Error connecting to https://www.isoc.nl: " + str(err))
+        print("Internet connection does not seem to be working")
+        sys.exit(1)
 
     # display introduction
     os.system("clear")
@@ -190,6 +201,8 @@ There are two approaches to this:
             spin.update()
             time.sleep(0.5)
         print("ready.")
+        # turn on the VPN for every boot
+        os.system("systemctl enable openvpn")
     else:
         print("File /etc/openvpn/hotspot.conf not found, no VPN set up.")
     wait_for_user()
