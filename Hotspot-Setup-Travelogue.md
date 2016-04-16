@@ -110,6 +110,17 @@ Finally, log in as the `nomad` user and remove the default `pi` user:
 
     $ sudo deluser --remove-all-files pi
 
+# Set to auto-login on boot
+
+    $ cd /etc/systemd/system/getty.target.wants
+    $ sudo rm getty@tty1.service
+    $ sudo ln -s /etc/systemd/system/autologin@.service getty@tty1.service
+    $ sudo vim getty@tty1.service       # change "pi" to "nomad"
+    ...
+    ExecStart=-/sbin/agetty --autologin nomad --noclear %I $TERM
+    ...
+
+
 # Picking Private IP Addresses
 
 We need to decide which IP addresses to use when people connect. This
