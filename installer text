@@ -1,0 +1,44 @@
+Welcome to the Refugee Hotspot Admin Setup.
+
+This is probably the first time you're running this device. So we would like to help you set this up. 
+
+The Refugee Hotspot is aimed to provide Internet connections to migrants and refugees by using a 3G connection and turning it into a wireless network that people can access. 
+
+Note: This setup is meant for people who will administer a Refugee Hotspot. This means you will need to have at least a basic understanding of networking and Debian or similar GNU/Linux systems. 
+
+Let's get this set up:
+
+1. Log messages
+As an administrator of this device you might want to receive an email every time the device does an update and when it reboots. If so, please enter an email address for these updates here. If you don't enter anything, no mail will be sent, if you enter D, the default project mailaddress of ISOC-NL will be used (which will only be used for statistic). 
+
+
+2. Remote Access
+You might want to remotely administer this device so you can check whether it works without having to be physically connected to it. We'll provide remote access via a Tor Hidden Service. 
+
+To be able to get remote access to this device you will need to add your public SSH key. 
+(If you don't know what an SSH key is, let alone how to generate it, you might want to resort to searching on the Internet or the ssh man page ($ man ssh).
+
+Please paste your key here:  
+
+This is the Tor Hidden Service address to which you can connect now:
+
+3. Since mobile Internet of a scarce resource we want to give you the option of limiting the download speed per user.
+	If you choose 0, there will be no limit
+	If you enter nothing, the default 50 kb/sec will be used.
+
+4. What do you want the name of the Wireless Network to be (SSID)?
+
+5. This device works without a VPN connection, but is work better with VPN connection , it also protects your users from (some sorts) of surveillance. 
+Therefore it is recommended that you purchase you own VPN certificate, for instance from AirVPN: https://airvpn.org. Alternatively you can use a VPN certificate provided by us, with no guarantee that it will keep working. 
+
+Please copy and paste your ovpn certificat here: (ENTER for no VPN, D for default VPN)
+
+6. The landing page that is being used is placed in /var/www/html/, feel free to edit or replace it. 
+
+Your device should be good to go now. Documentation can be found at:
+https://github.com/RefugeeHotspot/RefugeeHotspot. You can leave questions, issues and suggestion in the issue tracker there. Discussions and questions can be asked via mail at list@refugeehotspot.net.
+
+
+
+
+
