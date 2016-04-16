@@ -7,7 +7,7 @@ The Refugee Hotspot is aimed to provide Internet connections to migrants and ref
 Note: This setup is meant for people who will administer a Refugee Hotspot. This means you will need to have at least a basic understanding of networking and Debian or similar GNU/Linux systems. 
 
 Let's get this set up.
-	(There are seven short steps for this, which should not take you more than 10 minutes)
+	(There are eight short steps for this, which should not take you more than 10 minutes)
 
 0. VPN
 First make sure that you have either copied a VPN certificate (.ovpn file) and your public SSH key copied on this flash card or have a USB plugged in with these files on it. If you have no idea what we're talking about, continue. 
@@ -17,10 +17,10 @@ You might want to remotely administer this device so you can check whether it wo
 
 To be able to get remote access to this device you will need to add your public SSH key /home/nomad/.ssh/authorized_keys/ . There are two approaches to this: 
 
-Approach 1
-Put the SD card into your computer and copy your SSH key to /home/nomad/.ssh/authorized_keys/, 
+	Approach 1
+Put the SD card into your computer and copy your SSH key to /home/nomad/.sshauthorized_keys/, 
 
-Approach 2
+	Approach 2
 Put an USB flash drive with the public SSH key on it into the Raspberry Pi and copy the SSH key to /home/nomad/.ssh/authorized_keys/ (you might need to mount the USB flash drive). 
  
 (If you don't know what an SSH key is, let alone how to generate it, you might want to resort to searching on the Internet or the ssh man page ($ man ssh), or not use remote administatration at all :) )
@@ -32,15 +32,16 @@ This device works without a VPN connection, but it works better and is more stab
 
 Therefore it is recommended that you purchase you own VPN certificate, for instance from AirVPN: https://airvpn.org. Alternatively you can use a VPN certificate provided by us, with no guarantee that it will keep working. 
 
-Please copy and paste  D for default VPN)
+///Please copy and paste  D for default VPN///
 
 3. Administration notifications by email
 As an administrator of this device you might want to receive an email every time the device does an update and when it reboots. If so, please enter an email address for these updates here:
 
-4. Do you also want status updates of your device to be sent to ISOC-NL ? This will be used for statistic and might help us troubleshooting. Y/N
+4. Do you also want status updates of your device to be sent to ISOC-NL ? This will be used for statistics and might help us troubleshooting. Y/N
 
 5. Traffic limiting
 Since mobile Internet of a scarce resource we want to give you the option of limiting the download speed per user.
+	The value you type will be kb/sec.
 	If you choose 0, there will be no limit
 	If you enter nothing, the default 50 kb/sec will be used.
 
@@ -51,5 +52,5 @@ What do you want the name of the Wireless Network to be (SSID)?
 The landing page that is being used is placed in /var/www/html/, feel free to edit or replace it. 
 
 Your device should be good to go now. Documentation can be found at:
-https://github.com/RefugeeHotspot/RefugeeHotspot. You can leave questions, issues and suggestion in the issue tracker there. Discussions and questions can be asked via mail at list@refugeehotspot.net.
+https://github.com/RefugeeHotspot/RefugeeHotspot. You can leave questions, issues and suggestions in the issue tracker there. Discussions and questions can be asked via mail at list@refugeehotspot.net.
 
