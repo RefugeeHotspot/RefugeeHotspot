@@ -1,5 +1,6 @@
 #! /usr/bin/env python3
 
+import fileinput
 import getpass
 import http.client
 import os
@@ -307,6 +308,23 @@ be no limit. The default is 50 kilobits/second.
             print("Invalid number: " + answer)
         else:
             break
+
+    # add/remove the traffic shaping voodoo to our /etc/network/interfaces
+    for line in fileinput.input("/etc/network/interfaces",
+                                inplace=1, backup='.bak'):
+        # add our traffic shaping to our wlan0 stuff
+        if line.startswith("iface wlan0 inet static"):
+            print(line, end='')
+            if max_speed > 0:
+                print("        post-up tc qdisc add dev wlan0 root handle 1:0 htb default 10")
+                print("        post-up tc class add dev wlan0 parent 1:0 classid 1:10 htb rate {}kbps ceil {}kbps prio 0".format(max_speed, max_speed))
+        # remove previous traffic shaping
+        elif (line.lstrip().startswith("post-up tc qdisc add dev wlan0 root handle 1:0 htb default 10") or
+              line.lstrip().startswith("post-up tc class add dev wlan0 parent 1:0 classid 1:10 htb rate ")):
+            pass
+        # everything else pass through unchanged
+        else:
+            print(line, end='')
 
     # WiFi SSID
     os.system("clear")
