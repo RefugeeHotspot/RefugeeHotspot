@@ -7,12 +7,11 @@ Refugee Hotspot.
 
 Before starting, a few pieces of hardware will be necessary:
 
-  1. Raspberry Pi 2
+  1. Raspberry Pi 3
   2. Powered USB hub
-  3. ALFA AWUS036AC USB 802.11 WiFi dongle
-  4. Huawei E303 USB 4G dongle
-  5. microSD card (and a way to write to it)
-  6. USB cables to connect everything
+  3. Huawei E303 USB 3G dongle
+  4. microSD card (and a way to write to it)
+  5. USB cables to connect everything
 
 During the setup, you'll need some way to connect the Raspberry Pi 2
 to the Internet. The easiest way is via an Ethernet cable, but
@@ -108,13 +107,14 @@ then the password is no longer necessary.
 
 Finally, log in as the `nomad` user and remove the default `pi` user:
 
+    $ logout	
     $ sudo deluser --remove-all-files pi
 
 # Set to auto-login on boot
 
     $ cd /etc/systemd/system/getty.target.wants
     $ sudo rm getty@tty1.service
-    $ sudo ln -s /etc/systemd/system/autologin@.service getty@tty1.service
+    $ sudo ln -s /etc/systemd/system/auto/login@.service getty@tty1.service
     $ sudo vim getty@tty1.service       # change "pi" to "nomad"
     ...
     ExecStart=-/sbin/agetty --autologin nomad --noclear %I $TERM
@@ -157,7 +157,10 @@ The `post-up` rules will set up the traffic shaping so that we don't
 download too much stuff. This allows VoIP but is not enough for video
 (tested with YouTube).
 
-Create `/etc/hostap/hostapd.conf`:
+
+the `post-up` and `post-down` rules get added by the installer, but can also be added manually. 
+
+Create `/etc/hostapd/hostapd.conf`:
 
 ```
 interface=wlan0
@@ -178,8 +181,10 @@ ieee80211h=1
 logger_stdout=-1
 logger_stdout_level=2
 
-ssid=nomad
+ssid=Refugee Hotspot
 ```
+
+Normally the SSID gets set by the installer.
 
 Finally, update `/etc/default/hostapd` and set:
 
@@ -187,7 +192,7 @@ Finally, update `/etc/default/hostapd` and set:
 DAEMON_CONF="/etc/hostapd/hostapd.conf"
 ```
 
-Reboot, and we should be advertising the wireless network. We can't
+Reboot, and we should exbe advertising the wireless network. We can't
 connect to it yet, but the WiFi is now working.
 
 # DHCP Server Setup
@@ -228,8 +233,7 @@ of course cannot get to the Internet.
 
 # Remote Administration Setup
 
-We want to be able to administer the AP remotely. While in the long
-run this is probably not a good idea, for now it is reasonable.
+We want to be able to administer the AP remotely. 
 
 ## Disable Password Logins
 
@@ -292,11 +296,13 @@ You need to have the `connect` program installed. In Debian or
 Debian-derived distributions (like Ubuntu or Linux Mint) then this
 is in the `connect-proxy` package.
 
+    $ sudo apt install connect-proxy
+
 Then you can log in via ssh using the `.onion` name.
 
 ## Enable 4G Network
 
-We turn our Huawei E303 into a modem though magic commands. This is
+We turn our Huawei E303 into a modem through magic commands. This is
 all documented:
 
 http://www.linux-hardware-guide.com/2014-05-11-huawei-e303-wireless-mobile-broadband-modem-umts-gsm-microsd-usb-2-0
@@ -329,9 +335,7 @@ iface eth0 inet manual
         post-down tc qdisc del dev eth0 root fq_codel
 ```
 
-
 A reboot should bring the dongle up as the `eth1` interface.
-
 
 # VPN Setup
 
@@ -339,15 +343,16 @@ We prefer to tunnel traffic via a VPN. We have a VPN set up at
 GreenHost:
 
     $ sudo apt install openvpn
-    $ sudo mkdir /etc/openvpn/greenhost
-    $ sudo cp ca.crt niels.* /etc/openvpn/greenhost
     $ sudo cp greenhost.ovpn /etc/openvpn/greenhost.conf
-    $ sudo vim /etc/openvpn/greenhost.conf # set paths to /etc/openvpn/greenhost
     ...
-    ca /etc/openvpn/greenhost/ca.crt
-    cert /etc/openvpn/greenhost/niels.crt
-    key /etc/openvpn/greenhost/niels.key
-    ...
+
+    $ sudo chown root:root /etc/openvpn/greenhost.conf 
+    $ sudo chmod 600 /etc/openvpn/greenhost.conf 
+
+Enable VPN at startup
+
+    $ systemctl enable openvpn
+    $ sudo systemctl daemon-reload
 
 # Setting up IP Forwarding
 
@@ -501,9 +506,11 @@ Install the Apache web server:
 
     $ sudo apt install apache2
 
-Put our awesome landing page in place:
+Put our awesome landing page in place from 
+https://github.com/RefugeeHotspot/RefugeeHotspot/blob/master/landingpage/html%20v0.3/index.html :
 
-    $ sudo cp index.html /var/www/html/index.html
+    $ cd /var/www/html/index.html
+    $ sudo wget https://github.com/RefugeeHotspot/RefugeeHotspot/blob/master/landingpage/html%20v0.3/index.html
 
 Set up CGI so that it will run:
 
@@ -515,8 +522,10 @@ Set up CGI so that it will run:
     ...
     $ sudo apachectl restart
 
+Put the cgi button in place:
 
-nomad@nomad:/var/www/html $ sudo mv button.cgi /usr/lib/cgi-bin/.
+    $ cd /usr/lib/cgi-bin
+    $ sudo wget https://github.com/RefugeeHotspot/RefugeeHotspot/blob/master/landingpage/html%20v0.3/button.cgi
 
 # Set up E-mail 
 
@@ -544,13 +553,14 @@ As documented here: https://wiki.debian.org/UnattendedUpgrades
     $ sudo apt install unattended-upgrades
     $ sudo vi /etc/apt/apt.conf.d/50unattended-upgrades
     ...
+## here we need to set the mail based on installer (and our own)
     Unattended-Upgrade::Mail "hotspots@refugeehotspot.net";
     Unattended-Upgrade::Automatic-Reboot "true";
     Unattended-Upgrade::Automatic-Reboot-Time "03:00";
     Acquire::http::Dl-Limit "50";
     ...
 
-    $ sudo dpkg-reconfigure -plow unattended-upgrades
+sudo dpkg-reconfigure -plow unattended-upgrades
     APT::Periodic::Update-Package-Lists "1";
     APT::Periodic::Unattended-Upgrade "1";
 
@@ -600,6 +610,7 @@ Sincerely Yours,
 Hotspotly
 boot_info_mail
 ```
+>
 
 Then use cron to invoke this script on boot:
 
