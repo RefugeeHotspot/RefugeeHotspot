@@ -196,6 +196,8 @@ There are two approaches to this:
         have_vpn = False
     if have_vpn:
         print("Starting OpenVPN...", end='', flush=True)
+        os.system("systemctl stop openvpn")
+        time.sleep(1)
         os.system("systemctl start openvpn")
         spin = spinner()
         while not "tun0" in interfaces(): 
@@ -338,6 +340,16 @@ What do you want the name of the Wireless Network to be (SSID)?
             print("Maximum SSID length is 32")
         elif len(ssid) > 0:
             break
+
+    # set our SSID in the hostapd.conf
+    for line in fileinput.input("/etc/hostapd/hostapd.conf",
+                                inplace=1, backup='.bak'):
+        # change SSID
+        if line.startswith("ssid="):
+            print("ssid=" + ssid)
+        # everything else pass through
+        else:
+            print(line, end='')
 
     # Landing page
     os.system("clear")
