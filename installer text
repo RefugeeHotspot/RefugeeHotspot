@@ -8,6 +8,7 @@ Note: This setup is meant for people who will administer a Refugee Hotspot. This
 
 Let's get this set up.
 	(There are eight short steps for this, which should not take you more than 10 minutes)
+	(If you ever want to change one of these setting, you can always run this wizard again by simply rebooting the device)
 
 0. VPN
 First make sure that you have either copied a VPN certificate (.ovpn file) and your public SSH key copied on this flash card or have a USB plugged in with these files on it. If you have no idea what we're talking about, continue. 
