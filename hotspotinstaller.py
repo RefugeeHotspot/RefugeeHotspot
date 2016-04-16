@@ -28,7 +28,6 @@ def yes_no(prompt):
 
 def wait_for_user():
     input("Press Enter to continue...")
-    print()
 
 def interfaces():
     iface_file = open("/proc/net/dev", "r")
@@ -60,6 +59,7 @@ def main():
         sys.exit(0)
 
     # display introduction
+    os.system("clear")
     print("""
 Welcome to the Refugee Hotspot Admin Setup.
 
@@ -82,12 +82,13 @@ Let's get this set up.
     wait_for_user()
 
     # alert about information that will be needed
+    os.system("clear")
     print("""0. Preparation
 
 You need the following:
 
-* A VPN certificate (.ovpn file)
 * Your public SSH key
+* A VPN certificate (.ovpn file)
 
 Make sure that you have either copied these onto this flash card or
 have a USB plugged in with these files on it.
@@ -97,6 +98,7 @@ If you have no idea what we're talking about, just continue.
     wait_for_user()
 
     # remote access (SSH) setup
+    os.system("clear")
     print("""1. Remote Access (SSH Login)
 
 You might want to remotely administer this device so you can check
@@ -106,7 +108,7 @@ Remote access is provided via a Tor Hidden Service.
 To be able to get remote access to this device you will need to add
 your public SSH key to the file:
 
-     /home/nomad/.ssh/authorized_keys/
+     /home/nomad/.ssh/authorized_keys
 
 There are two approaches to this: 
 
@@ -122,6 +124,9 @@ There are two approaches to this:
     Raspberry Pi and copy the SSH key to
     /home/nomad/.ssh/authorized_keys (you might need to mount the USB
     flash drive first). 
+
+(Note that you will need to do a similar thing with the VPN setup,
+so if you want to do that then read the next step before starting.)
  
 If you don't know what an SSH key is, let alone how to generate it,
 you might want to search on the Internet, or read the ssh man page
@@ -140,6 +145,7 @@ administration e-mail on boot, if you set this up.
     wait_for_user()
 
     # VPN setup
+    os.system("clear")
     print("""2. VPN 
 
 This device works without a VPN connection, but it works better and is
@@ -150,18 +156,31 @@ Therefore it is recommended that you purchase you own VPN certificate,
 for instance from AirVPN: https://airvpn.org. Alternatively you can
 use a VPN certificate provided by us, with no guarantee that it will
 keep working. 
+
+To configure the VPN copy the .ovpn file to:
+
+     /etc/openvpn/hotspot.conf
+
+There are two approaches to this: 
+
+    Approach 1
+    ----------
+    Put the SD card into your computer and copy your public .ovpn file
+    to $MOUNT/etc/openvpn/hotspot.conf where $MOUNT is the directory
+    you have mounted the SD card.
+
+    Approach 2
+    ----------
+    Put an USB flash drive with the public OPVN file on it into the
+    Raspberry Pi and copy the .ovpn file to /etc/openvpn/hotspot.conf
+    (you might need to mount the USB flash drive first). 
 """)
-    while True:
-        vpn_file = input("Name of the ovpn file (empty if none): ")
-        if vpn_file == '':
-            break
-        try:
-            shutil.copy(vpn_file, "/etc/openvpn/hotspot.conf")
-        except IOError as e:
-            print("Error copying ovpn file: " + str(e))
-        else:
-            break
-    if vpn_file:
+    try:
+        os.stat("/etc/openvpn/hotspot.conf")
+        have_vpn = True
+    except FileNotFoundError:
+        have_vpn = False
+    if have_vpn:
         print("Starting OpenVPN...", end='', flush=True)
         os.system("systemctl start openvpn")
         spin = spinner()
@@ -169,9 +188,12 @@ keep working.
             spin.update()
             time.sleep(0.5)
         print("ready.")
-    print()
+    else:
+        print("File /etc/openvpn/hotspot.conf not found, no VPN set up.")
+    wait_for_user()
 
     # Administrator e-mail setup
+    os.system("clear")
     print("""3. Administration notifications by e-mail
 
 As an administrator of this device you might want to receive an email
@@ -179,18 +201,18 @@ every time the device does an update and when it reboots. If so,
 please enter an email address for these updates.
 """)
     admin_email = input("Administrator e-mail: ")
-    print()
 
     # Administrator e-mail setup
+    os.system("clear")
     print("""4. Status reporting to ISOC-NL
 
 Do you also want status updates of your device to be sent to ISOC-NL?
 This will be used for statistics and might help us troubleshooting.
 """)
     want_status_to_isoc = yes_no("Send status updates to ISOC-NL?")
-    print()
 
     # Traffic shaping
+    os.system("clear")
     print("""5. Traffic limiting
 
 Since on the mobile Internet bandwidth is a scarce resource we want to
@@ -209,9 +231,9 @@ be no limit. The default is 50 kilobits/second.
             print("Invalid number: " + answer)
         else:
             break
-    print()
 
     # WiFi SSID
+    os.system("clear")
     print("""6. WiFi SSID
 
 What do you want the name of the Wireless Network to be (SSID)?
@@ -222,9 +244,9 @@ What do you want the name of the Wireless Network to be (SSID)?
             print("Maximum SSID length is 32")
         elif len(ssid) > 0:
             break
-    print()
 
     # Landing page
+    os.system("clear")
     print("""7. Landing page
 
 The landing page that is being used is placed in /var/www/html/, feel
@@ -233,6 +255,7 @@ free to edit or replace it.
     wait_for_user()
 
     # Champagne
+    os.system("clear")
     print("""
 Your device should be good to go now. Documentation can be found at:
 
