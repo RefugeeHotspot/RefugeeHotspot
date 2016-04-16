@@ -543,12 +543,63 @@ As documented here: https://wiki.debian.org/UnattendedUpgrades
     APT::Periodic::Update-Package-Lists "1";
     APT::Periodic::Unattended-Upgrade "1";
 
+# Boot Notification
+
+We configure the hotspot to send a mail so that we know what the
+Tor hidden address for the SSH server is. It includes the MAC address
+of the Ethernet on the hotspot, which should be unique.
+
+Put the following script in /root/mail-tor-hostname.sh:
+
+```bash
+#! /bin/bash
+
+# wait for our tunnel to appear
+while true
+do
+    /sbin/ip link show tun0 > /dev/null
+    if [ $? -eq 0 ]; then
+        break
+    fi
+    sleep 2
+done
+
+# target of our e-mail
+TO="hotspots@refugeehotspot.net"
+
+# build a subject line we can understand
+ETH0_MAC=`ip addr show dev eth0 | awk '/^ *link/{print $2}'`
+TOR_HOSTNAME=`cat /var/lib/tor/ssh/hostname`
+SUBJECT="Refugee Hotspot booted, MAC=$ETH0_MAC, Tor=$TOR_HOSTNAME"
+
+# send the mail
+/usr/bin/mail -s "$SUBJECT" $TO <<boot_info_mail
+Dear Refugee Hotspot administrator,
+
+A Refugee Hotspot has rebooted. The MAC address and name of the Tor 
+hidden service for SSH is in the subject line.
+
+This message came from:
+
+$ sudo crontab -l
+@reboot bash /root/mail-tor-hostname.sh
+
+Sincerely Yours,
+
+Hotspotly
+boot_info_mail
+```
+
+Then use cron to invoke this script on boot:
+
+    $ sudo crontab -e
+       ...
+    @reboot /bin/bash /root/mail-tor-hostname.sh
 
 --------
 
 _Everything after here is future work or random notes_
 
-TODO: e-mail on boot with Tor hidden service
 TODO: check TLS certificate when sending mail
 TODO: upnp  
 TODO: IPv6  
