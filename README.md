@@ -10,65 +10,29 @@ The goal is to implement a critical and conscious use of technology, conceptuall
 
 # Device Specs
 
-Five setup possibilities to be tested at the hackathon (more info below):
-    
-    1.
-    4g USB modem/dongle + RPi + antenna
-    (in which RPi functions as router)
-    (cheapest but depends on most config of RPi)
+The current lab work is being done with:
 
-    2.
-    4g dongle + router TPLink + RPi 
-    (in which RPi functions for extra services)    
-    (a bit more expensive but with less config and dedicated hardware (RPi doesn't do networking)
-    
-    3.
-    4g router&modem DLink + RPi
-    (in which RPi functions for extra services)
-    (most expensive but with integrated dongle, modem and router (RPi doesn't do networking)
-    # assumption is that this is pretty much a ready-made solution
-    
-    4. 
-    4g dongle + netaidkit [0][1] + RPi
-    (in which services run on RPi)
+* Raspberry Pi 3
+* Powered USB hub
+* Huawei E303 USB 4G dongle
+* microSD card
 
-    5.
-    4g dongle + netaidkit [0][1]
-    (in which services run on netaidkit)
+The beta prototype will probably have:
 
-
-
+* Raspberry Pi 3
+* USB battery as power supply
+* Huawei E303 USB 4G dongle
+* USB y-cables linking stuff together
+* microSD card
+* Kick-ass custom laser-cut case
 
 # Hackathon
 
-Will be organized on February 4, 5 and 6 in Amsterdam - sign up here -> http://hackshackers.nl/
+There was a hackathon 2016-02-04 to 2016-02-06 in Amsterdam:
 
-We'll be working on the issues mentioned here: https://github.com/RefugeeHotspot/RefugeeHotspot/issues
-as well as other issues you might come up with. Feel free to add them or bring them up at the hackathon.
+    http://hackshackers.nl/
 
-List hardware that will be available for hacking at hackathon:
-
-    http://www.dlink.com/uk/en/home-solutions/connect/broadband-modems-and-routers/dwr-921-4g-lte-router <--- SIM card slot integrated
-    
-    Portable Router TP­LINK TL­MR3020 3G/4G Wireless N150 <--- No SIM card slot http://www.amazon.co.uk/gp/product/B00634PLTW?psc=1&redirect=true&ref_=ox_sc_act_title_7&smid=A3P5ROKL5A1OLE
-    
-    USB 4g dongle+SIM card http://www.amazon.co.uk/Huawei-E398u-1-Rotator-FASTEST-available/dp/B00BPYTX4E/ref=sr_1_1?ie=UTF8&qid=1448723439&sr=8-1&keywords=huawei+4g+dongle+e398u
-    
-    Battery Pack 20.000mah http://www.amazon.co.uk/Compact-20000mAh-Portable-Anker-PowerCore/dp/B00VJSGT2A/ref=sr_1_3?ie=UTF8&qid=1448723027&sr=8-3&keywords=battery+pack
-    
-    TTL cable http://www.amazon.co.uk/USB-TTL-Serial-Cable-Raspberry/dp/B00CNUH6QG/ref=sr_1_2?ie=UTF8&qid=1448723791&sr=8-2&keywords=ttl+cable+raspberry+pi
-    
-    Wifi Antenna USB http://www.amazon.co.uk/Network-AWUS036AC-Long-Range-Dual-Band-Connections/dp/B00MX57AO4/ref=sr_1_10?ie=UTF8&qid=1448723928&sr=8-10&keywords=wifi+antenna+usb
-    
-    32GB Micro SD card (OS+storage space) http://www.amazon.co.uk/gp/product/B00519BEQY?psc=1&redirect=true&ref_=ox_sc_act_title_4&smid=A1I0WA5OXHTGPB
-    
-    Case for the device
-    
-    4 x Raspberry Pi 2 B+ http://www.amazon.co.uk/gp/product/B00T2U7R7I?psc=1&redirect=true&ref_=ox_sc_act_title_3&smid=A3P5ROKL5A1OLE
-    
-    4 x Netaidkit
-
-Feel free to bring your own hardware! All Raspberry Pi's are welcome :)
+The initial 
 
 # Questions? Comments? More information?:
 
@@ -76,17 +40,17 @@ Feel free to email refugeehotspot [at] alternativelearningtank [dot] net or leav
 More information: http://www.alternativelearningtank.net/otb.html
 
 
-
 # Project notes
-Rpi Zero version:
-    Adding Ethernet support in the GPIO:
-        http://raspi.tv/2015/ethernet-on-pi-zero-how-to-put-an-ethernet-port-on-your-pi
-        
-    Adding Wifi module soldered (no USB):
-        https://hackaday.com/2015/11/28/first-raspberry-pi-zero-hack-piggy-back-wifi/
 
+The hotspot works and is "feature complete" for the first version. It
+starts up and will let people have Internet access with this political
+tool. We (Niels and Shane) are currently working on finishing this and
+getting it into shape for delivery to the first users sometime in
+2016-05.
 
+The most up-to-date notes are in the [travelogue](Hotspot-Setup-Travelogue.md).
 
-[0] https://netaidkit.net/
-
-[1] https://github.com/radicallyopensecurity/NetAidKit
+We're working on the installer in the
+[hotspotinstaller.py](hotspotinstaller.py), and will put together some
+documentation for people wanting to build their own Refugee Hotspot
+when that is in good shape.
