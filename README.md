@@ -56,5 +56,3 @@ We're working on a reproducible lasercut casing with Waag Society. We hope to ha
 
 Feel free to email info [at] refugeehotspot [dot] net or leave an issue in the tracker.
 
-
-

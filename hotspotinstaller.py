@@ -1,5 +1,6 @@
 #! /usr/bin/env python3
 
+import fileinput
 import getpass
 import http.client
 import os
@@ -195,6 +196,8 @@ There are two approaches to this:
         have_vpn = False
     if have_vpn:
         print("Starting OpenVPN...", end='', flush=True)
+        os.system("systemctl stop openvpn")
+        time.sleep(1)
         os.system("systemctl start openvpn")
         spin = spinner()
         while not "tun0" in interfaces(): 
@@ -308,6 +311,23 @@ be no limit. The default is 50 kilobits/second.
         else:
             break
 
+    # add/remove the traffic shaping voodoo to our /etc/network/interfaces
+    for line in fileinput.input("/etc/network/interfaces",
+                                inplace=1, backup='.bak'):
+        # add our traffic shaping to our wlan0 stuff
+        if line.startswith("iface wlan0 inet static"):
+            print(line, end='')
+            if max_speed > 0:
+                print("        post-up tc qdisc add dev wlan0 root handle 1:0 htb default 10")
+                print("        post-up tc class add dev wlan0 parent 1:0 classid 1:10 htb rate {}kbps ceil {}kbps prio 0".format(max_speed, max_speed))
+        # remove previous traffic shaping
+        elif (line.lstrip().startswith("post-up tc qdisc add dev wlan0 root handle 1:0 htb default 10") or
+              line.lstrip().startswith("post-up tc class add dev wlan0 parent 1:0 classid 1:10 htb rate ")):
+            pass
+        # everything else pass through unchanged
+        else:
+            print(line, end='')
+
     # WiFi SSID
     os.system("clear")
     print("""6. WiFi SSID
@@ -320,6 +340,16 @@ What do you want the name of the Wireless Network to be (SSID)?
             print("Maximum SSID length is 32")
         elif len(ssid) > 0:
             break
+
+    # set our SSID in the hostapd.conf
+    for line in fileinput.input("/etc/hostapd/hostapd.conf",
+                                inplace=1, backup='.bak'):
+        # change SSID
+        if line.startswith("ssid="):
+            print("ssid=" + ssid)
+        # everything else pass through
+        else:
+            print(line, end='')
 
     # Landing page
     os.system("clear")
