@@ -322,18 +322,22 @@ ACTION=="add", SUBSYSTEM=="usb", ATTRS{idVendor}=="12d1", ATTRS{idProduct}=="1f0
 Add the following to `/etc/network/interfaces`:
 
 ```
-iface eth1 inet manual
-        pre-up tc qdisc add dev eth1 root fq_codel
-        post-down tc qdisc del dev eth1 root fq_codel
+allow-hotplug eth1
+iface eth1 inet dhcp
 ```
 
-Go ahead and set up `eth0` to also use the `fq_codel` scheme:
-
+And set the eth0 interface to be manual
 ```
 iface eth0 inet manual
-        pre-up tc qdisc add dev eth0 root fq_codel
-        post-down tc qdisc del dev eth0 root fq_codel
 ```
+
+Also to disable BufferBloat go ahead and set the queuing to use
+fq_codel in /etc/sysctl.d/10-bufferbloat.conf:
+
+```
+net.core.default_qdisc=fq_codel
+```
+
 
 A reboot should bring the dongle up as the `eth1` interface.
 
