@@ -612,10 +612,14 @@ do
 done
 
 # target of our e-mail
-TO=`cat /root/admin-email.conf`
+TO=`cat /root/admin-email.conf 2>/dev/null`
 if [ "$TO" = "" ]; then
     exit
 fi
+
+# target of ISOC e-mail (if any)
+ISOC_TO=`cat /root/isoc-email.conf 2>/dev/null`
+TO="$TO $ISOC_TO"
 
 # build a subject line we can understand
 ETH0_MAC=`ip addr show dev eth0 | awk '/^ *link/{print $2}'`

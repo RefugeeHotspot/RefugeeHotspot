@@ -310,6 +310,10 @@ This will be used for statistics and might help us troubleshooting.
 
     if send_server:
         want_status_to_isoc = yes_no("Send status updates to ISOC-NL?")
+        if want_status_to_isoc == "y":
+            isoc_fp = open("/root/isoc-email.conf", "w")
+            isoc_fp.write("hotspots@refugeehotspot.net")
+            isoc_fp.close()
     else:
         print("Skipping setting status updates to ISOC-NL "
               "since no SMTP configured")
