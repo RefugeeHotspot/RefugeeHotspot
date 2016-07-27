@@ -113,6 +113,8 @@ Finally, log in as the `nomad` user and remove the default `pi` user:
 
 # Set to auto-login on boot
 
+We will get systemd to login automatically:
+
     $ cd /etc/systemd/system/getty.target.wants
     $ sudo rm getty@tty1.service
     $ sudo ln -s /etc/systemd/system/auto/login@.service getty@tty1.service
@@ -121,6 +123,14 @@ Finally, log in as the `nomad` user and remove the default `pi` user:
     ExecStart=-/sbin/agetty --autologin nomad --noclear %I $TERM
     ...
 
+We will also run the installer on the login that happens on the
+console, by creating `/home/nomad/.bash_profile`:
+
+```
+if [ `tty` == "/dev/tty1" ]; then
+    sudo python3 hotspotinstaller.py
+fi
+```
 
 # Picking Private IP Addresses
 
