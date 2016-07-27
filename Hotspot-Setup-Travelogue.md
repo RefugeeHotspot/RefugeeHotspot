@@ -71,6 +71,7 @@ If you want, it might be helpful to install a few utilities.
     $ sudo apt install telnet
     $ sudo apt install dnsutils
     $ sudo apt install lsof
+    $ sudo apt install iperf
 
 ## Renaming the Device
 
@@ -408,9 +409,14 @@ include: "/etc/unbound/unbound.conf.d/*.conf"
 
 server:
   prefetch: yes
-  prefetch-key: yes
+#  prefetch-key: yes
   minimal-responses: yes
-  harden-referral-path: yes
+#  harden-referral-path: yes
+
+  # disable DNSSEC:
+  # https://unbound.net/documentation/howto_turnoff_dnssec.html
+  val-permissive-mode: yes
+  module-config: "iterator"
 
   interface: 0.0.0.0
   access-control: 172.27.1.0/24 allow
@@ -554,8 +560,14 @@ We'll use the Simple SMTP program, which just delivers mail.
 
 As documented here: https://wiki.debian.org/UnattendedUpgrades
 
-    $ sudo apt install unattended-upgrades
+    $ sudo apt install unattended-upgrades apt-listchanges
     $ sudo vi /etc/apt/apt.conf.d/50unattended-upgrades
+    ...
+    Unattended-Upgrade::Origins-Pattern {
+        // Codename based matching:
+        // This will follow the migration of a release through different
+        // archives (e.g. from testing to stable and later oldstable).
+      "o=Raspbian,n=jessie";
     ...
 ## here we need to set the mail based on installer (and our own)
     Unattended-Upgrade::Mail "hotspots@refugeehotspot.net";
