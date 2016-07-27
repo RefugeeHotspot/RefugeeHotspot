@@ -225,6 +225,7 @@ Note this is optional.
     send_port = 587
     send_user = ''
     send_password = ''
+    send_hostname = os.uname().nodename + '.refugeehotspot.net'
     while True:
         if send_server:
             prompt = "Sending e-mail server [%s]: " % send_server
@@ -257,6 +258,11 @@ Note this is optional.
         else:
             prompt = "Sending e-mail password: "
         send_password = getpass.getpass(prompt)
+        if send_hostname:
+            prompt = "Hostname to send from [%s]: " % send_hostname
+        else:
+            prompt = "Hostname to send from: "
+        send_hostname = input_with_default(prompt, send_hostname)
 
         try:
             with smtplib.SMTP(host=send_server, port=send_port) as smtp:
@@ -266,10 +272,29 @@ Note this is optional.
             print("Error connecting to SMTP server: " + str(err))
         else:
             # SMTP login worked!
+            send_domain = '.'.join(send_hostname.split('.')[1:])
+            ssmtp_fp = open("/etc/ssmtp/ssmtp.conf", "w")
+            ssmtp_fp.write('''
+mailhub=%s:%d
+rewritedomain=%s
+hostname=%s
+FromLineOverride=YES
+UseTLS=YES
+UseSTARTTLS=YES
+AuthUser=%s
+AuthPass=%s
+''' % (send_server, send_port,
+       send_domain, send_hostname,
+       send_user, send_password))
+            ssmtp_fp.close()
             break
 
     if send_server:
-        recv_email = input("Receiving e-mail address:")
+        recv_email = input("Receiving e-mail address: ")
+        if recv_email:
+            admin_fp = open("/root/admin-email.conf", "w")
+            admin_fp.write(recv_email)
+            admin_fp.close()
     else:
         print("Skipping setting receiving e-mail since no SMTP configured")
         wait_for_user()

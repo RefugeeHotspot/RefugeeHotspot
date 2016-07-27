@@ -612,7 +612,10 @@ do
 done
 
 # target of our e-mail
-TO="hotspots@refugeehotspot.net"
+TO=`cat /root/admin-email.conf`
+if [ "$TO" = "" ]; then
+    exit
+fi
 
 # build a subject line we can understand
 ETH0_MAC=`ip addr show dev eth0 | awk '/^ *link/{print $2}'`
