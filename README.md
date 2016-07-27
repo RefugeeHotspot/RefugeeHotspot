@@ -54,5 +54,7 @@ We're working on a reproducible lasercut casing with Waag Society. We hope to ha
 
 # Questions? Comments? More information?:
 
-Feel free to email info [at] refugeehotspot [dot] net or leave an issue in the tracker.
+Feel free to sign up to the mailinglist at https://lists.ghserv.net/mailman/listinfo/list and share your question, suggestion, or concern or leave an issue in the GitHub issue tracker.
+
+
 
