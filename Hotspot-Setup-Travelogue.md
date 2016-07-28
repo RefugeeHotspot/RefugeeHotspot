@@ -71,6 +71,7 @@ If you want, it might be helpful to install a few utilities.
     $ sudo apt install telnet
     $ sudo apt install dnsutils
     $ sudo apt install lsof
+    $ sudo apt install iperf
 
 ## Renaming the Device
 
@@ -112,6 +113,8 @@ Finally, log in as the `nomad` user and remove the default `pi` user:
 
 # Set to auto-login on boot
 
+We will get systemd to login automatically:
+
     $ cd /etc/systemd/system/getty.target.wants
     $ sudo rm getty@tty1.service
     $ sudo ln -s /etc/systemd/system/auto/login@.service getty@tty1.service
@@ -120,6 +123,14 @@ Finally, log in as the `nomad` user and remove the default `pi` user:
     ExecStart=-/sbin/agetty --autologin nomad --noclear %I $TERM
     ...
 
+We will also run the installer on the login that happens on the
+console, by creating `/home/nomad/.bash_profile`:
+
+```
+if [ `tty` == "/dev/tty1" ]; then
+    sudo python3 hotspotinstaller.py
+fi
+```
 
 # Picking Private IP Addresses
 
@@ -408,9 +419,14 @@ include: "/etc/unbound/unbound.conf.d/*.conf"
 
 server:
   prefetch: yes
-  prefetch-key: yes
+#  prefetch-key: yes
   minimal-responses: yes
-  harden-referral-path: yes
+#  harden-referral-path: yes
+
+  # disable DNSSEC:
+  # https://unbound.net/documentation/howto_turnoff_dnssec.html
+  val-permissive-mode: yes
+  module-config: "iterator"
 
   interface: 0.0.0.0
   access-control: 172.27.1.0/24 allow
@@ -554,8 +570,14 @@ We'll use the Simple SMTP program, which just delivers mail.
 
 As documented here: https://wiki.debian.org/UnattendedUpgrades
 
-    $ sudo apt install unattended-upgrades
+    $ sudo apt install unattended-upgrades apt-listchanges
     $ sudo vi /etc/apt/apt.conf.d/50unattended-upgrades
+    ...
+    Unattended-Upgrade::Origins-Pattern {
+        // Codename based matching:
+        // This will follow the migration of a release through different
+        // archives (e.g. from testing to stable and later oldstable).
+      "o=Raspbian,n=jessie";
     ...
 ## here we need to set the mail based on installer (and our own)
     Unattended-Upgrade::Mail "hotspots@refugeehotspot.net";
@@ -590,7 +612,14 @@ do
 done
 
 # target of our e-mail
-TO="hotspots@refugeehotspot.net"
+TO=`cat /root/admin-email.conf 2>/dev/null`
+if [ "$TO" = "" ]; then
+    exit
+fi
+
+# target of ISOC e-mail (if any)
+ISOC_TO=`cat /root/isoc-email.conf 2>/dev/null`
+TO="$TO $ISOC_TO"
 
 # build a subject line we can understand
 ETH0_MAC=`ip addr show dev eth0 | awk '/^ *link/{print $2}'`
